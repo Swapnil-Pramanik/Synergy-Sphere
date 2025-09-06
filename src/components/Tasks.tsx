@@ -10,6 +10,7 @@ import { api } from '../lib/api'
 
 interface TasksProps {
   onTaskClick: (taskId: string) => void
+  onCreateTask?: () => void
 }
 
 interface Task {
@@ -35,7 +36,7 @@ const statusColors = {
   'done': 'bg-green-100 text-green-800 border-green-200'
 }
 
-export function Tasks({ onTaskClick }: TasksProps) {
+export function Tasks({ onTaskClick, onCreateTask }: TasksProps) {
   const [tasks, setTasks] = React.useState<Task[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -136,7 +137,10 @@ export function Tasks({ onTaskClick }: TasksProps) {
           <h1 className="text-2xl text-gray-900">Tasks</h1>
           <p className="text-gray-600">Manage and track all your team tasks</p>
         </div>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
+        <Button 
+          className="bg-green-600 hover:bg-green-700 text-white"
+          onClick={onCreateTask}
+        >
           <Plus className="w-4 h-4 mr-2" />
           New Task
         </Button>

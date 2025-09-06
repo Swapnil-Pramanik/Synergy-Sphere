@@ -5,17 +5,37 @@ const DB_HOST = process.env.MYSQL_HOST || 'localhost';
 const DB_USER = process.env.MYSQL_USER || 'root';
 const DB_PASS = process.env.MYSQL_PASSWORD || 'spcse@2024';
 
-async function getConnection() {
-  const conn = await mysql.createConnection({
+let pool;
+
+async function ensureDatabase() {
+  const admin = await mysql.createConnection({
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASS,
     multipleStatements: true,
   });
-  // Ensure database exists
-  await conn.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
-  await conn.query(`USE \`${DB_NAME}\``);
-  return conn;
+  await admin.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
+  await admin.end();
+}
+
+// getConnection returns a pool with the database preselected for all connections
+async function getConnection() {
+  if (!pool) {
+    await ensureDatabase();
+    pool = mysql.createPool({
+      host: DB_HOST,
+      user: DB_USER,
+      password: DB_PASS,
+      database: DB_NAME, // critical: every connection uses the right DB
+      waitForConnections: true,
+      connectionLimit: parseInt(process.env.MYSQL_POOL_SIZE || '10', 10),
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
+      multipleStatements: true,
+    });
+  }
+  return pool;
 }
 
 async function initDb() {

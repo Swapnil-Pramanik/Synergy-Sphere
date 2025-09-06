@@ -16,7 +16,10 @@ async function handle(res: Response) {
   let data: any = null
   try { data = await res.json() } catch {}
   if (!res.ok) {
-    const msg = data?.message || res.statusText || 'Request failed'
+    let msg = data?.message || res.statusText || 'Request failed'
+    if (data?.error) {
+      msg += `: ${typeof data.error === 'string' ? data.error : JSON.stringify(data.error)}`
+    }
     throw new Error(msg)
   }
   return data

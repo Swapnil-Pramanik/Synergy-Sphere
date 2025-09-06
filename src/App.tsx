@@ -118,11 +118,12 @@ export default function App() {
             onProjectClick={handleProjectClick} 
             onCreateTask={handleCreateTask}
             onCreateProject={handleCreateProject}
+            onNavigate={handleNavigate}
             refreshTrigger={refreshTrigger}
           />
         )
       case 'tasks':
-        return <Tasks onTaskClick={handleTaskClick} />
+        return <Tasks onTaskClick={handleTaskClick} onCreateTask={handleCreateTask} />
       case 'calendar':
         return <Calendar />
       case 'analytics':

@@ -16,10 +16,10 @@
      - Option B: Use the Node helper (auto-creates DB/tables/seeds): npm run db:init
   3) Start the backend API (port 4000 by default)
      - npm run server
-  4) Start the frontend (Vite dev server on port 5173 by default)
-     - npm run dev
+  4) Start the frontend (Vite dev server on port 3000 by default)
+    - npm run dev
 
-  Then open http://localhost:5173 in your browser. The frontend calls the API at VITE_API_URL (default http://localhost:4000). Set VITE_API_URL in a .env file if your backend runs elsewhere.
+Then open http://localhost:3000 in your browser. During development, the frontend proxies /api requests to http://localhost:4000 automatically, so you don’t need to set VITE_API_URL. In production builds, the frontend calls the API at VITE_API_URL (default http://localhost:4000). Set VITE_API_URL in a .env file if your backend runs elsewhere.
 
   ## Configuration
   Frontend:

@@ -1,5 +1,5 @@
 import React from 'react'
-import { User, Bell, Shield, Palette, Globe, Mail, Lock, Camera, Save } from 'lucide-react'
+import { User, Bell, Shield, Palette, Globe, Mail, Lock, Camera, Save, Phone, MapPin, Building, Calendar, Award, Github, Linkedin, Twitter, Plus, Trash2, Edit3, Key, Download, AlertTriangle } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Input } from './ui/input'
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Separator } from './ui/separator'
+import { Badge } from './ui/badge'
+import { Textarea } from './ui/textarea'
 
 interface SettingsProps {
   user: any
@@ -19,9 +21,23 @@ export function Settings({ user }: SettingsProps) {
     name: user?.name || '',
     email: user?.email || '',
     bio: '',
+    phone: '',
+    location: '',
+    department: '',
+    jobTitle: '',
+    startDate: '',
+    manager: '',
     timezone: 'UTC-8',
     language: 'en',
+    skills: [] as string[],
+    socialLinks: {
+      github: '',
+      linkedin: '',
+      twitter: '',
+    },
   })
+
+  const [newSkill, setNewSkill] = React.useState('')
 
   const [notifications, setNotifications] = React.useState({
     emailNotifications: true,

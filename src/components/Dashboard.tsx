@@ -10,6 +10,7 @@ interface DashboardProps {
   onProjectClick: (projectId: string) => void
   onCreateTask?: () => void
   onCreateProject?: () => void
+  onNavigate?: (page: string) => void
   refreshTrigger?: number
 }
 
@@ -21,7 +22,7 @@ const defaultStats = [
   { title: 'Team Members', key: 'teamMembers', value: 0, icon: Users, color: 'orange', trend: { value: '', isPositive: true } },
 ]
 
-export function Dashboard({ onProjectClick, onCreateTask, onCreateProject, refreshTrigger = 0 }: DashboardProps) {
+export function Dashboard({ onProjectClick, onCreateTask, onCreateProject, onNavigate, refreshTrigger = 0 }: DashboardProps) {
   // Dynamic projects from API
   const [projects, setProjects] = React.useState<any[]>([])
   const [stats, setStats] = React.useState<any[]>(defaultStats)
@@ -155,11 +156,19 @@ export function Dashboard({ onProjectClick, onCreateTask, onCreateProject, refre
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Task
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => onNavigate?.('team')}
+              >
                 <Users className="w-4 h-4 mr-2" />
                 Invite Team Member
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => onNavigate?.('analytics')}
+              >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 View Analytics
               </Button>

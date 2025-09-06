@@ -11,6 +11,14 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Process-level handlers for better diagnostics
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
 // Health check
 app.get('/api/health', async (req, res) => {
   try {
@@ -239,6 +247,13 @@ app.get('/api/stats/overview', async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: 'Server error', error: e.message });
   }
+});
+
+// Global Express error handler (must be after routes)
+app.use((err, req, res, next) => {
+  console.error('Request error:', err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ message: 'Server error', error: process.env.NODE_ENV === 'production' ? undefined : String(err?.message || err) });
 });
 
 // Start server

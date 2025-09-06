@@ -12,46 +12,40 @@ interface LayoutProps {
 
 export function Layout({ children, currentPage, onNavigate, onLogout, user }: LayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
-  
+  const sidebarWidth = sidebarCollapsed ? 80 : 256 // w-20 (5rem) vs w-64 (16rem)
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Desktop Sidebar - Always visible on desktop */}
-        <div className={`
-          ${sidebarCollapsed ? 'w-20' : 'w-64'} 
-          min-h-screen 
-          bg-white 
-          border-r 
-          border-gray-200 
-          transition-all 
-          duration-300 
-          ease-in-out 
-          flex-shrink-0
-        `}>
-          <Sidebar 
-            currentPage={currentPage} 
-            onNavigate={onNavigate} 
-            onLogout={onLogout}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-          />
-        </div>
-        
-        {/* Main Content Area */}
-        <div className="flex-1 min-h-screen">
-          {/* Header */}
-          <Header 
-            user={user} 
-            onLogout={onLogout}
-            sidebarCollapsed={sidebarCollapsed}
-            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          />
-          
-          {/* Main Content */}
-          <main className="p-6 bg-gray-50 min-h-[calc(100vh-80px)]">
-            {children}
-          </main>
-        </div>
+      {/* Fixed Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-40 ${
+          sidebarCollapsed ? 'w-20' : 'w-64'
+        }`}
+        style={{ overflowY: 'hidden' }}
+      >
+        <Sidebar
+          currentPage={currentPage}
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+      </div>
+
+      {/* Main area is offset by sidebar width and scrolls independently */}
+      <div className="min-h-screen" style={{ marginLeft: sidebarWidth }}>
+        {/* Header */}
+        <Header
+          user={user}
+          onLogout={onLogout}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+
+        {/* Scrollable Content */}
+        <main className="p-6 bg-gray-50 h-[calc(100vh-64px)] overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   )

@@ -18,12 +18,14 @@ interface ProjectModalProps {
 }
 
 const teamMembers = [
-  { id: 1, name: 'Alex Morgan', initials: 'AM', email: 'alex@company.com' },
-  { id: 2, name: 'Sarah Johnson', initials: 'SJ', email: 'sarah@company.com' },
-  { id: 3, name: 'Mike Chen', initials: 'MC', email: 'mike@company.com' },
-  { id: 4, name: 'Lisa Park', initials: 'LP', email: 'lisa@company.com' },
-  { id: 5, name: 'James Wilson', initials: 'JW', email: 'james@company.com' },
-  { id: 6, name: 'Emma Davis', initials: 'ED', email: 'emma@company.com' },
+  { id: 1, name: 'Alex Morgan', initials: 'AM', email: 'alex@company.com', role: 'Frontend Developer', availability: 'available', workload: 65, skills: ['React', 'TypeScript', 'UI/UX'] },
+  { id: 2, name: 'Sarah Johnson', initials: 'SJ', email: 'sarah@company.com', role: 'Backend Developer', availability: 'busy', workload: 90, skills: ['Node.js', 'Python', 'API Design'] },
+  { id: 3, name: 'Mike Chen', initials: 'MC', email: 'mike@company.com', role: 'Full Stack Developer', availability: 'available', workload: 45, skills: ['React', 'Node.js', 'DevOps'] },
+  { id: 4, name: 'Lisa Park', initials: 'LP', email: 'lisa@company.com', role: 'UI/UX Designer', availability: 'partially_available', workload: 75, skills: ['Figma', 'Design Systems', 'User Research'] },
+  { id: 5, name: 'James Wilson', initials: 'JW', email: 'james@company.com', role: 'DevOps Engineer', availability: 'available', workload: 30, skills: ['AWS', 'Docker', 'CI/CD'] },
+  { id: 6, name: 'Emma Davis', initials: 'ED', email: 'emma@company.com', role: 'Product Manager', availability: 'busy', workload: 85, skills: ['Strategy', 'Analytics', 'Stakeholder Management'] },
+  { id: 7, name: 'David Kim', initials: 'DK', email: 'david@company.com', role: 'QA Engineer', availability: 'available', workload: 55, skills: ['Testing', 'Automation', 'Quality Assurance'] },
+  { id: 8, name: 'Rachel Green', initials: 'RG', email: 'rachel@company.com', role: 'Data Analyst', availability: 'partially_available', workload: 70, skills: ['Analytics', 'SQL', 'Data Visualization'] },
 ]
 
 const projectTypes = [
@@ -39,6 +41,13 @@ const priorities = [
   { value: 'low', label: 'Low Priority', color: 'bg-blue-100 text-blue-700' },
   { value: 'medium', label: 'Medium Priority', color: 'bg-yellow-100 text-yellow-700' },
   { value: 'high', label: 'High Priority', color: 'bg-red-100 text-red-700' },
+]
+
+const severityLevels = [
+  { value: 'low', label: 'Low Impact', color: 'bg-green-100 text-green-700', icon: '🟢' },
+  { value: 'medium', label: 'Medium Impact', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+  { value: 'high', label: 'High Impact', color: 'bg-orange-100 text-orange-700', icon: '🟠' },
+  { value: 'critical', label: 'Critical Impact', color: 'bg-red-100 text-red-700', icon: '🔴' },
 ]
 
 const statuses = [
@@ -366,31 +375,98 @@ export function ProjectModal({ isOpen, onClose, onSave, projectId }: ProjectModa
           <div className="space-y-3">
             <Label className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
-              <span>Team Members</span>
+              <span>Team Members ({teamMembers.filter(m => m.availability === 'available').length} available)</span>
             </Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`member-${member.id}`}
-                    checked={formData.teamMembers.includes(member.id)}
-                    onCheckedChange={() => handleTeamMemberToggle(member.id)}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs">
-                      {member.initials}
+            <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3">
+              <div className="space-y-3">
+                {teamMembers.map((member) => {
+                  const getAvailabilityColor = (availability: string) => {
+                    switch (availability) {
+                      case 'available':
+                        return 'bg-green-100 text-green-800 border-green-200'
+                      case 'busy':
+                        return 'bg-red-100 text-red-800 border-red-200'
+                      case 'partially_available':
+                        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                      default:
+                        return 'bg-gray-100 text-gray-800 border-gray-200'
+                    }
+                  }
+
+                  const getAvailabilityText = (availability: string) => {
+                    switch (availability) {
+                      case 'available':
+                        return 'Available'
+                      case 'busy':
+                        return 'Busy'
+                      case 'partially_available':
+                        return 'Partial'
+                      default:
+                        return 'Unknown'
+                    }
+                  }
+
+                  return (
+                    <div key={member.id} className="flex items-center space-x-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all">
+                      <Checkbox
+                        id={`member-${member.id}`}
+                        checked={formData.teamMembers.includes(member.id)}
+                        onCheckedChange={() => handleTeamMemberToggle(member.id)}
+                        disabled={member.availability === 'busy'}
+                      />
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
+                        member.availability === 'available' ? 'bg-green-100 text-green-700' :
+                        member.availability === 'busy' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {member.initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-semibold text-gray-900">{member.name}</p>
+                          <Badge variant="outline" className={`${getAvailabilityColor(member.availability)} text-xs px-2`}>
+                            {getAvailabilityText(member.availability)}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-2">{member.role}</p>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                              <span>Workload</span>
+                              <span>{member.workload}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div 
+                                className={`h-1.5 rounded-full ${
+                                  member.workload >= 90 ? 'bg-red-500' :
+                                  member.workload >= 70 ? 'bg-yellow-500' :
+                                  'bg-green-500'
+                                }`}
+                                style={{ width: `${member.workload}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {member.skills.slice(0, 3).map((skill, idx) => (
+                            <span key={idx} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                              {skill}
+                            </span>
+                          ))}
+                          {member.skills.length > 3 && (
+                            <span className="text-xs text-gray-500">+{member.skills.length - 3}</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{member.email}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  )
+                })}
+              </div>
             </div>
-            <p className="text-xs text-gray-500">
-              Selected: {formData.teamMembers.length} member{formData.teamMembers.length !== 1 ? 's' : ''}
-            </p>
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>Selected: {formData.teamMembers.length} member{formData.teamMembers.length !== 1 ? 's' : ''}</span>
+              <span>{teamMembers.filter(m => m.availability === 'available').length} available, {teamMembers.filter(m => m.availability === 'busy').length} busy</span>
+            </div>
           </div>
 
           {/* Project Objectives */}

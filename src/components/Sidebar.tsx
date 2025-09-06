@@ -64,8 +64,8 @@ export function Sidebar({ currentPage, onNavigate, onLogout, collapsed = false, 
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 p-4 flex flex-col justify-between">
-        <div className="space-y-1">
+      <nav className="flex-1 px-4 py-6 flex flex-col justify-between">
+        <div className="space-y-2">
           {navigationItems.map((item) => {
             const Icon = item.icon
             const isActive = currentPage === item.id
@@ -76,18 +76,18 @@ export function Sidebar({ currentPage, onNavigate, onLogout, collapsed = false, 
                   onClick={() => onNavigate(item.id)}
                   className={`
                     w-full flex items-center 
-                    ${collapsed ? 'justify-center p-3' : 'justify-start px-3 py-2.5'} 
-                    rounded-lg transition-all duration-200 
+                    ${collapsed ? 'justify-center p-4' : 'justify-start px-4 py-3.5'} 
+                    rounded-xl transition-all duration-200 font-medium
                     ${isActive 
-                      ? 'bg-green-100 text-green-700 shadow-sm' 
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-green-100 to-green-50 text-green-700 shadow-md border-l-4 border-green-500' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm'
                     }
                   `}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-5 h-5 ${collapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                  <Icon className={`w-5 h-5 ${collapsed ? '' : 'mr-4'} flex-shrink-0`} />
                   {!collapsed && (
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-semibold tracking-wide">{item.label}</span>
                   )}
                 </button>
                 
@@ -109,10 +109,11 @@ export function Sidebar({ currentPage, onNavigate, onLogout, collapsed = false, 
           <div className="mb-4 border-t border-gray-200" />
 
           {/* Bottom Items */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             {bottomItems.map((item) => {
               const Icon = item.icon
               const isLogout = item.id === 'logout'
+              const isActive = currentPage === item.id
               
               return (
                 <div key={item.id} className="relative group">
@@ -120,18 +121,20 @@ export function Sidebar({ currentPage, onNavigate, onLogout, collapsed = false, 
                     onClick={() => item.id === 'logout' ? onLogout() : onNavigate(item.id)}
                     className={`
                       w-full flex items-center 
-                      ${collapsed ? 'justify-center p-3' : 'justify-start px-3 py-2.5'} 
-                      rounded-lg transition-all duration-200 
-                      ${isLogout 
-                        ? 'text-gray-700 hover:bg-red-50 hover:text-red-600' 
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ${collapsed ? 'justify-center p-4' : 'justify-start px-4 py-3.5'} 
+                      rounded-xl transition-all duration-200 font-medium
+                      ${isActive && !isLogout
+                        ? 'bg-gradient-to-r from-green-100 to-green-50 text-green-700 shadow-md border-l-4 border-green-500' 
+                        : isLogout 
+                        ? 'text-gray-700 hover:bg-red-50 hover:text-red-600 hover:shadow-sm' 
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm'
                       }
                     `}
                     title={collapsed ? item.label : undefined}
                   >
-                    <Icon className={`w-5 h-5 ${collapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                    <Icon className={`w-5 h-5 ${collapsed ? '' : 'mr-4'} flex-shrink-0`} />
                     {!collapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
+                      <span className="text-sm font-semibold tracking-wide">{item.label}</span>
                     )}
                   </button>
                   
