@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bell, Settings, Moon, Sun } from 'lucide-react'
+import { Bell, Settings, Moon, Sun, Menu, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
@@ -13,14 +13,37 @@ import {
 } from './ui/dropdown-menu'
 import { ImageWithFallback } from './figma/ImageWithFallback'
 
-export function Header() {
+interface HeaderProps {
+  user: any
+  onLogout: () => void
+  sidebarCollapsed?: boolean
+  onToggleSidebar?: () => void
+}
+
+export function Header({ user, onLogout, sidebarCollapsed, onToggleSidebar }: HeaderProps) {
   const [isDark, setIsDark] = React.useState(false)
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        {/* Left side - could add breadcrumbs here */}
-        <div className="flex-1" />
+    <header className="bg-white border-b border-gray-200 h-16 flex items-center px-6">
+      <div className="flex items-center justify-between w-full">
+        {/* Left side - Sidebar toggle */}
+        <div className="flex items-center space-x-4">
+          {onToggleSidebar && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleSidebar}
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeft className="w-5 h-5" />
+              ) : (
+                <PanelLeftClose className="w-5 h-5" />
+              )}
+            </Button>
+          )}
+        </div>
 
         {/* Right side - Actions */}
         <div className="flex items-center space-x-4">
@@ -86,17 +109,17 @@ export function Header() {
                     src="https://images.unsplash.com/photo-1425421669292-0c3da3b8f529?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBlcnNvbnxlbnwxfHx8fDE3NTcwNTE3MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" 
                     alt="Profile" 
                   />
-                  <AvatarFallback>AM</AvatarFallback>
+                  <AvatarFallback>{user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Alex Morgan</DropdownMenuLabel>
+              <DropdownMenuLabel>{user?.name || 'User'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Profile Settings</DropdownMenuItem>
               <DropdownMenuItem>Preferences</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">Sign Out</DropdownMenuItem>
+              <DropdownMenuItem className="text-red-600" onClick={onLogout}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

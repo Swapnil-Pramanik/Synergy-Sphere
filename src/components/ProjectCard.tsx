@@ -1,10 +1,16 @@
 import React from 'react'
-import { Calendar, Users, MoreHorizontal } from 'lucide-react'
+import { Calendar, Users, MoreHorizontal, Edit, Eye, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from './ui/card'
 import { Badge } from './ui/badge'
 import { Progress } from './ui/progress'
 import { Button } from './ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 
 interface ProjectCardProps {
   id: string
@@ -22,6 +28,8 @@ interface ProjectCardProps {
   tasksCompleted: number
   tasksTotal: number
   onClick?: (id: string) => void
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 const statusConfig = {
@@ -41,45 +49,81 @@ export function ProjectCard({
   members, 
   tasksCompleted, 
   tasksTotal,
-  onClick 
+  onClick,
+  onEdit,
+  onDelete 
 }: ProjectCardProps) {
   const statusInfo = statusConfig[status]
 
   return (
-    <Card className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => onClick?.(id)}>
+    <Card className="hover:shadow-lg transition-all group border-l-4" style={{
+      borderLeftColor: status === 'active' ? '#22c55e' : 
+                      status === 'completed' ? '#6b7280' : 
+                      status === 'pending' ? '#f59e0b' : '#3b82f6'
+    }}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg text-gray-900 mb-1 group-hover:text-green-600 transition-colors">
+          <div className="flex-1 cursor-pointer" onClick={() => onClick?.(id)}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-green-600 transition-colors">
               {title}
             </h3>
             <p className="text-gray-600 text-sm line-clamp-2">{description}</p>
           </div>
-          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onClick?.(id)}>
+                <Eye className="w-4 h-4 mr-2" />
+                View Details
+              </DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(id)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Project
+                </DropdownMenuItem>
+              )}
+              {onDelete && (
+                <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Project
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Status and Progress */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Badge variant="outline" className={statusInfo.className}>
+            <Badge variant="outline" className={`${statusInfo.className} font-medium`}>
               {statusInfo.label}
             </Badge>
-            <span className="text-sm text-gray-600">{progress}% Complete</span>
+            <span className="text-sm font-semibold text-gray-700">{progress}% Complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <div className="space-y-1">
+            <Progress value={progress} className="h-3" />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>Progress</span>
+              <span>{progress === 100 ? 'Completed' : `${100 - progress}% remaining`}</span>
+            </div>
+          </div>
         </div>
 
         {/* Task Stats */}
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600">
-            {tasksCompleted}/{tasksTotal} tasks completed
-          </span>
-          <span className="text-gray-500">
-            {tasksTotal - tasksCompleted} remaining
-          </span>
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-700 font-medium">
+              📋 {tasksCompleted}/{tasksTotal} tasks completed
+            </span>
+            <span className="text-gray-500">
+              {tasksTotal - tasksCompleted} remaining
+            </span>
+          </div>
         </div>
 
         {/* Members and Due Date */}

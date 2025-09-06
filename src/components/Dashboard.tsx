@@ -4,92 +4,61 @@ import { StatCard } from './StatCard'
 import { ProjectCard } from './ProjectCard'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { api } from '../lib/api'
 
 interface DashboardProps {
   onProjectClick: (projectId: string) => void
+  onCreateTask?: () => void
+  onCreateProject?: () => void
+  refreshTrigger?: number
 }
 
-// Mock data
-const stats = [
-  { title: 'Active Projects', value: 8, icon: FolderOpen, color: 'green' as const, trend: { value: '12%', isPositive: true } },
-  { title: 'Total Tasks', value: 156, icon: CheckSquare, color: 'blue' as const, trend: { value: '8%', isPositive: true } },
-  { title: 'Completed Tasks', value: 89, icon: Clock, color: 'purple' as const, trend: { value: '23%', isPositive: true } },
-  { title: 'Team Members', value: 24, icon: Users, color: 'orange' as const, trend: { value: '4%', isPositive: true } },
+// Dynamic stats from API
+const defaultStats = [
+  { title: 'Active Projects', key: 'activeProjects', value: 0, icon: FolderOpen, color: 'green' as const, trend: { value: '', isPositive: true } },
+  { title: 'Total Tasks', key: 'totalTasks', value: 0, icon: CheckSquare, color: 'blue' as const, trend: { value: '', isPositive: true } },
+  { title: 'Completed Tasks', key: 'completedTasks', value: 0, icon: Clock, color: 'purple', trend: { value: '', isPositive: true } },
+  { title: 'Team Members', key: 'teamMembers', value: 0, icon: Users, color: 'orange', trend: { value: '', isPositive: true } },
 ]
 
-const projects = [
-  {
-    id: '1',
-    title: 'Website Redesign',
-    description: 'Complete overhaul of company website with modern design and improved UX',
-    status: 'active' as const,
-    progress: 75,
-    dueDate: 'Jan 15',
-    tasksCompleted: 12,
-    tasksTotal: 16,
-    members: [
-      { id: '1', name: 'Alex Morgan', initials: 'AM' },
-      { id: '2', name: 'Sarah Johnson', initials: 'SJ' },
-      { id: '3', name: 'Mike Chen', initials: 'MC' },
-    ]
-  },
-  {
-    id: '2',
-    title: 'Mobile App Development',
-    description: 'Cross-platform mobile application for iOS and Android',
-    status: 'in-progress' as const,
-    progress: 45,
-    dueDate: 'Feb 28',
-    tasksCompleted: 9,
-    tasksTotal: 20,
-    members: [
-      { id: '4', name: 'Emma Davis', initials: 'ED' },
-      { id: '5', name: 'James Wilson', initials: 'JW' },
-      { id: '6', name: 'Lisa Park', initials: 'LP' },
-      { id: '7', name: 'Tom Brown', initials: 'TB' },
-    ]
-  },
-  {
-    id: '3',
-    title: 'Brand Identity Refresh',
-    description: 'New logo, color palette, and brand guidelines for 2024',
-    status: 'pending' as const,
-    progress: 20,
-    dueDate: 'Mar 10',
-    tasksCompleted: 3,
-    tasksTotal: 15,
-    members: [
-      { id: '8', name: 'Ryan Taylor', initials: 'RT' },
-      { id: '9', name: 'Sophie Lee', initials: 'SL' },
-    ]
-  },
-  {
-    id: '4',
-    title: 'Customer Support Portal',
-    description: 'Self-service portal with knowledge base and ticket system',
-    status: 'completed' as const,
-    progress: 100,
-    dueDate: 'Dec 15',
-    tasksCompleted: 22,
-    tasksTotal: 22,
-    members: [
-      { id: '10', name: 'David Kim', initials: 'DK' },
-      { id: '11', name: 'Anna White', initials: 'AW' },
-      { id: '12', name: 'Chris Green', initials: 'CG' },
-    ]
-  }
-]
+export function Dashboard({ onProjectClick, onCreateTask, onCreateProject, refreshTrigger = 0 }: DashboardProps) {
+  // Dynamic projects from API
+  const [projects, setProjects] = React.useState<any[]>([])
+  const [stats, setStats] = React.useState<any[]>(defaultStats)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
-export function Dashboard({ onProjectClick }: DashboardProps) {
+  React.useEffect(() => {
+    let mounted = true
+    async function load() {
+      try {
+        setLoading(true)
+        const [projectsData, statsData] = await Promise.all([
+          api.get('/api/projects'),
+          api.get('/api/stats/overview')
+        ])
+        if (mounted) {
+          setProjects(projectsData)
+          setStats(defaultStats.map(s => ({ ...s, value: statsData[s.key] ?? 0 })))
+        }
+      } catch (e: any) {
+        if (mounted) setError(e.message)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [refreshTrigger])
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl mb-2">Welcome back, Alex! 👋</h1>
+            <h1 className="text-3xl mb-2">Welcome back! 👋</h1>
             <p className="text-green-100 text-lg">
-              You have 8 active projects and 67 pending tasks. Keep up the great work!
+              You have {stats.find(s=>s.key==='activeProjects')?.value ?? 0} active projects and {(stats.find(s=>s.key==='totalTasks')?.value ?? 0) - (stats.find(s=>s.key==='completedTasks')?.value ?? 0)} pending tasks. Keep up the great work!
             </p>
           </div>
           <div className="hidden lg:block">
@@ -115,16 +84,29 @@ export function Dashboard({ onProjectClick }: DashboardProps) {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl text-gray-900">Your Projects</h2>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Button 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={onCreateProject}
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </Button>
           </div>
           <div className="grid gap-6">
-            {projects.map((project) => (
+            {loading && <div className="text-gray-600">Loading projects...</div>}
+            {error && <div className="text-red-600">{error}</div>}
+            {!loading && !error && projects.map((project) => (
               <ProjectCard 
-                key={project.id} 
-                {...project} 
+                key={project.id}
+                id={String(project.id)}
+                title={project.title}
+                description={project.description}
+                status={project.status}
+                progress={project.progress}
+                dueDate={project.due_date ? new Date(project.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                tasksCompleted={project.tasksCompleted || 0}
+                tasksTotal={project.tasksTotal || 0}
+                members={[]}
                 onClick={onProjectClick}
               />
             ))}
@@ -165,7 +147,11 @@ export function Dashboard({ onProjectClick }: DashboardProps) {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={onCreateTask}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Task
               </Button>
