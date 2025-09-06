@@ -1,0 +1,4 @@
+# Database Ignore
+*.bak
+*.sql.gz
+*.dump

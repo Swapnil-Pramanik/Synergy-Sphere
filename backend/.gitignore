@@ -1,0 +1,4 @@
+# Backend Ignore
+__pycache__/
+venv/
+*.log
